@@ -9,9 +9,11 @@
 void createLayout();
 void createSun(double *ySun);
 void createDuckHead(double *x1, double *y1, double *beakMovement);
-void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate);
+void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate, double *dX, double *dY, int *numCount);
 void createFish(double *fX, double *fY);
+void createMoreFish(double *mX, double *mY);
 void createLobster(double *lX, double *lY);
+void printGrass();
 
 int main()
 {
@@ -19,6 +21,7 @@ int main()
 
         //Declare variables of the ride
         char c; //check to see if someone presses a button
+	int numCount=0; 
         double i=.01; //used in delta t
 	double l=.01;
 	double beakMovement=0; //used to help measure when the beak is fully closed (so it can be opened again)
@@ -31,6 +34,10 @@ int main()
 	double fY=400;
 	double lX=0; //starting point for the lobster
 	double lY=600;
+	double dX=500; //dead fish
+	double dY=200;
+	double mX=1;
+	double mY=220;
 	double doRotate=1;
 	double ySun=50; //the sun is always setting/rising
 	int velocity=5; //basic velocity of the bird in the air
@@ -40,9 +47,10 @@ int main()
 		createLayout(); //create the layout of the structure
 		createSun(&ySun); //create a visual of the sun in the corner
 		createDuckHead(&x1, &y1, &beakMovement);
-		createBird(&bX, &bY, &i, &l, velocity, &doRotate);
+		createBird(&bX, &bY, &i, &l, velocity, &doRotate, &dX, &dY, &numCount);
 		createFish(&fX, &fY);
 		createLobster(&lX, &lY);
+		createMoreFish(&mX, &mY);
                 gfx_flush();
 
                 //Check if the user has decided to quit the program
@@ -79,6 +87,10 @@ void createLayout(){
 	gfx_fill_polygon(mypts2, 3);
 	gfx_fill_rectangle(0, 700, 800, 100); 
 
+	printGrass();
+}
+
+void printGrass(){
 	//Grass life
 	gfx_color(43, 198, 25);
 	gfx_line(20, 700, 20, 780);
@@ -108,7 +120,7 @@ void createLayout(){
 	gfx_line(726, 680, 726, 750);
 	gfx_line(717, 760, 715, 700);
 	gfx_line(734, 760, 738, 700);
-}
+}	
 
 //Create a filled in sun
 void createSun(double *ySun){
@@ -145,7 +157,7 @@ void createDuckHead(double *x1, double *y1, double *beakMovement){
 }
 
 //Create person moving in the cart
-void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate){
+void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate, double *dX, double *dY, int *numCount){
 	double deltat=.01;
 	//Recalculate i, l by multiplying by delta t. This changes the angle of rotation. 
 	if (*doRotate<10){
@@ -156,18 +168,40 @@ void createBird(double *bX, double *bY, double *i, double *l, double velocity, d
 		*doRotate=*doRotate+.1;
 	}
 	else{
-		*bX=*bX+4;
-		if (*bX>600 && *bX<750){
-			*bY=*bY+5;
+		*bX=*bX+.5;
+		if (*bX>300 && *bX<=750 && *bY <= 200){
+			*bY=*bY+.7;
 		}
 		if (*bX>=780){
 			*doRotate=1;
 			*bX=40;
+			*dX=900;
+			*numCount=1;
+		}
+		if(*bX>=500 && *bX<=780){
+			*bY=*bY-.8;
 		}
 	}
-	gfx_color(252, 206, 25);
-	gfx_line((int)*bX, (int)*bY, (int)*bX-10, (int)*bY-10); //Bird's wings
-        gfx_line((int)*bX, (int)*bY, (int)*bX-10, (int)*bY+10); //Bird's wings
+	gfx_color(255, 1, 2);
+	gfx_line((int)*bX, (int)*bY, (int)*bX-20, (int)*bY-20); //Bird's wings
+        gfx_line((int)*bX, (int)*bY, (int)*bX-20, (int)*bY+20); //Bird's wings
+
+	if (*bX >= 500 && *bX <=780){
+		*dX=*bX;
+		*dY=*bY;
+	}
+	if (*numCount==0){
+		gfx_color(247, 246, 242); //picking up a dead fish on his first try
+	}
+	else{
+		gfx_color(252, 206, 25); //now he picks up live fish
+	}
+	//Dead fish that the bird will pick up
+	XPoint xp = {300,450}; // initialize a point (using X11's Xpoint struct)
+	// set up 2 arrays of points
+ 	XPoint mypts1[] = { {*dX,*dY-10},{*dX,*dY+10},{*dX+10,*dY} };
+	gfx_fill_polygon(mypts1, 3);
+	gfx_fill_circle((int)*dX+10, (int)*dY, 8);
 }
 
 void createFish(double *fX, double *fY){
@@ -187,6 +221,28 @@ void createFish(double *fX, double *fY){
 	gfx_line((int)*fX-40, (int)*fY+20, (int)*fX-20, (int)*fY+20);
 	gfx_line((int)*fX-30, (int)*fY+7, (int)*fX-10, (int)*fY+7);
 	gfx_line((int)*fX, (int)*fY+20, (int)*fX, (int)*fY+20);
+}
+
+void createMoreFish(double *mX, double *mY){
+	gfx_color(252, 206, 25);
+	//Dead bird that it will pick up eventually
+	XPoint xp = {300,450}; // initialize a point (using X11's Xpoint struct)
+	// set up 2 arrays of points
+ 	XPoint mypts1[] = { {*mX,*mY-10},{*mX,*mY+10},{*mX+10,*mY} };
+	XPoint mypts2[] = { {*mX+2,*mY+40},{*mX+2,*mY+20},{*mX+12,*mY+30} };
+	XPoint mypts3[] = { {*mX-8,*mY+60},{*mX-8,*mY+80},{*mX,*mY+70} };
+	gfx_fill_polygon(mypts1, 3);
+	gfx_fill_circle((int)*mX+10, (int)*mY, 8);
+	gfx_fill_polygon(mypts2, 3);
+	gfx_fill_circle((int)*mX+12, (int)*mY+30, 8);
+	gfx_fill_polygon(mypts3, 3);
+	gfx_fill_circle((int)*mX, (int)*mY+70, 8);
+	if (*mX<=790){
+		*mX=*mX+.5;
+	}
+	else{
+		*mX=0;
+	}
 }
 
 void createLobster(double *lX, double *lY){
