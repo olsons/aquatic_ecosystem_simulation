@@ -327,21 +327,15 @@ void createLobster(double *lX, double *lY){
 
 void createWhale(double *sX, double *sY){
 	XPoint xp = {300,450}; // initialize a point (using X11's Xpoint struct)
-	XPoint mypts1[] = { {*sX+210,*sY},{*sX+230,*sY},{*sX+230,*sY+90} };
-
+	XPoint mypts1[] = { {*sX+100, *sY},{*sX+223, *sY+2},{*sX+215, *sY+20} }; //mouth
+	XPoint mypts2[] = { {*sX-200, *sY},{*sX-220-75*cos(M_PI/3), *sY+75*sin(M_PI/3)},{*sX-220-75*cos(M_PI/3), *sY-75*sin(M_PI/3)} }; //tail
 
 	gfx_color(65, 100, 146); //blue whale
-        gfx_ellipse((int)*sX, (int)*sY, 220, 76); //body
-//	gfx_fill_arc((int)*sX, (int)*sY, 220, 76, 0, 360);
+	gfx_fill_arc((int)*sX-220, (int)*sY-76, 440, 152, 0, 360); //body
+	gfx_fill_polygon(mypts2, 3); //tail
 	gfx_color(17,167,242); //water color to avoid extra oval line over mouth
 	gfx_fill_polygon(mypts1, 3); //cover up line to show true mouth
-	gfx_color(65, 100, 146);
-	gfx_line((int)(*sX+100),(int)(*sY),(int)(*sX+220), (int)(*sY)+2); //mouth
-	gfx_line((int)(*sX+100),(int)(*sY),(int)(*sX+215), (int)(*sY)+20); //mouth
-        gfx_circle((int)(*sX+135), (int)(*sY-30), 4); //eye
-        gfx_line((int)(*sX-220), (int)*sY, (int)(*sX-220-50*cos(M_PI/3)), (int)(*sY+50*sin(M_PI/3))); //next three tail
-        gfx_line((int)(*sX-220-50*cos(M_PI/3)), (int)(*sY+50*sin(M_PI/3)), (int)(*sX-220-50*cos(M_PI/3)), (int)(*sY-50*sin(M_PI/3)));
-	gfx_line((int)(*sX-220-50*cos(M_PI/3)), (int)(*sY-50*sin(M_PI/3)), (int)(*sX-220), (int)*sY);
+	gfx_fill_arc((int)(*sX+131), (int)(*sY-34), 8, 8, 0, 360); //eye
 	if ((*sX-230)<=798){
 		*sX+=.5; //whale speed
 	}
