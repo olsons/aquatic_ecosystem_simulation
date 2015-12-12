@@ -5,14 +5,15 @@
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
-void createLayout(double *ySun);
+void createLayout(double *ySun, double **gAngle, int **gDir);
 void createDuckHead(double *x1, double *y1, double *beakMovement);
 void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate, double *dX, double *dY, int *numCount);
-void createFish(double *fX, double *fY);
+void createFish(double *fX, double *fY, double *fY2, double *sX, int *eat);
 void createMoreFish(double *mX, double *mY);
 void createLobster(double *lX, double *lY);
-void printGrass();
+void printGrass(double *gAngle, int *gDir);
 void createWhale(double *sX, double *sY);
 
 int main()
@@ -32,6 +33,9 @@ int main()
 	double bY=50;
 	double fX=810; //starting point for the fish that are minnows
 	double fY=390;
+	double fY2=390;
+	srand(time(NULL));	
+	int eat=rand() % 2; //determines if one of the minnows will be eaten by the whale or not
 	double lX=0; //starting point for the lobster
 	double lY=600;
 	double dX=500; //dead fish
@@ -41,15 +45,19 @@ int main()
 	double doRotate=1;
 	double ySun=-5; //the sun is always setting/rising
 	int velocity=5; //basic velocity of the bird in the air
+	double gAngle=5*M_PI/6; //grass angle
+	double *angle=&gAngle;
+	int gDir=0; //grass direction (1 is left and 0 is right)
+	int *dir=&gDir;
 	double sX=-230; //whale
 	double sY=390;
 
         while(1){
                 gfx_clear();
-		createLayout(&ySun); //create the layout of the structure
+		createLayout(&ySun, &angle, &dir); //create the layout of the structure
 		createDuckHead(&x1, &y1, &beakMovement);
 		createBird(&bX, &bY, &i, &l, velocity, &doRotate, &dX, &dY, &numCount);
-		createFish(&fX, &fY);
+		createFish(&fX, &fY, &fY2, &sX, &eat);
 		createLobster(&lX, &lY);
 		createMoreFish(&mX, &mY);
 		createWhale(&sX, &sY);
@@ -71,7 +79,7 @@ int main()
 }
 
 //Create the structure/support for the ride (what will hold up the duck)
-void createLayout(double *ySun){
+void createLayout(double *ySun, double **gAngle, int **gDir){
 	//Create a filled in sun
 	if (*ySun<=110){
 		gfx_color(186, 240, 255);
@@ -115,39 +123,31 @@ void createLayout(double *ySun){
 	gfx_fill_polygon(mypts2, 3);
 	gfx_fill_rectangle(0, 700, 800, 100); 
 
-	printGrass();
+	printGrass(*gAngle, *gDir);
 }
 
-void printGrass(){
+void printGrass(double *gAngle, int *gDir){
+	double m=cos(*gAngle);
+	double n=sin(*gAngle);
+	int i;
+
 	//Grass life
 	gfx_color(43, 198, 25);
-	gfx_line(20, 700, 20, 780);
-	gfx_line(30, 680, 30, 760);
-	gfx_line(25, 690, 25, 770);
-	gfx_line(15, 676, 18, 750);
-	gfx_line(35, 705, 35, 770);
-	gfx_line(26, 680, 26, 750);
-	gfx_line(17, 760, 15, 700);
-	gfx_line(34, 760, 38, 700);
+	
+	int grass[23][4]={{20, 700, 20, 780},{30, 680, 30, 760},{25, 690, 25, 770},{15, 676, 18, 750},{35, 705, 35, 770},{26, 680, 26, 750},{15, 700, 17, 760},{38, 700, 34, 760},{140, 740, 140, 780},{150, 720, 150, 760},{145, 710, 145, 770},{155, 726, 158, 750},{165, 715, 165, 770},{156, 720, 156, 750},{170, 720, 167, 790},{158, 740, 154, 780},{720, 700, 720, 780},{730, 680, 730, 760},{725, 690, 725, 770},{735, 705, 735, 770},{726, 680, 726, 750},{715, 700, 717, 760},{738, 700, 734, 760}};
 
-	gfx_line(140, 740, 140, 780);
-	gfx_line(150, 720, 150, 760);
-	gfx_line(145, 710, 145, 770);
-	gfx_line(155, 726, 158, 750);
-	gfx_line(165, 715, 165, 770);
-	gfx_line(156, 720, 156, 750);
-	gfx_line(167, 790, 170, 720);
-	gfx_line(154, 780, 158, 740);
+	for (i=0;i<=22;i++){
+		gfx_line(grass[i][0]+(grass[i][3]-grass[i][1])*cos(*gAngle), grass[i][1]-(grass[i][3]-grass[i][1])*sin(*gAngle), grass[i][2], grass[i][3]);
+	}
 
-
-	gfx_line(720, 700, 720, 780);
-	gfx_line(730, 680, 730, 760);
-	gfx_line(725, 690, 725, 770);
-	gfx_line(715, 676, 718, 750);
-	gfx_line(735, 705, 735, 770);
-	gfx_line(726, 680, 726, 750);
-	gfx_line(717, 760, 715, 700);
-	gfx_line(734, 760, 738, 700);
+	if (*gAngle>=5*M_PI/6 || (*gDir==1 && *gAngle>=M_PI/6)){
+		*gAngle-=.003;
+		*gDir=1; //moving left
+	}	
+	else if (*gAngle<=M_PI/6 || (*gDir==0 && *gAngle<=5*M_PI/6)){
+		*gAngle+=.003;
+		*gDir=0; //moving right
+	}
 }	
 
 //Create the duck's head
@@ -221,17 +221,41 @@ void createBird(double *bX, double *bY, double *i, double *l, double velocity, d
 	gfx_fill_circle((int)*dX+10, (int)*dY, 8);
 }
 
-void createFish(double *fX, double *fY){
+void createFish(double *fX, double *fY, double *fY2, double *sX, int *eat){
 	gfx_color(100, 100, 100);
-	*fX=*fX-5;
+	if (*fX-(*sX+220)<=180 && *fX-(*sX+200)>0){
+		*fY+=3;
+		if (*eat==1){		
+			*fY2+=1;
+		}
+		else if (*eat==0){
+			*fY2+=3;
+		}
+	}
+	/*if (*sX>=450 && *fX>=600){ //minnows swim down while the whale is moving off screen
+		*fY=570;
+		*fY2=570;
+		if (*eat==1){		
+			*fY2+=1;
+		}
+		else if (*eat==0){
+			*fY2+=3;
+		}
+	}*/
+	*fX-=5;
 	if (*fX<=10){
-		*fX=820;
+		*fY=390;
+		*fY2=390;
+		*fX=1300;
+		*eat=rand() % 2; //randomly decide if minnow should be eaten by whale
+	}
+	if (*fX-30>*sX+200 || *eat==0){
+		gfx_line((int)*fX-30, (int)*fY2-20, (int)*fX-10, (int)*fY2-20); //minnow that gets eaten
 	}
 	gfx_line((int)*fX, (int)*fY, (int)*fX+20, (int)*fY);
 	gfx_line((int)*fX+10, (int)*fY, (int)*fX+30, (int)*fY);
 	gfx_line((int)*fX+15, (int)*fY+10, (int)*fX+35, (int)*fY+10);
 	gfx_line((int)*fX-20, (int)*fY-10, (int)*fX, (int)*fY-10);
-	gfx_line((int)*fX-30, (int)*fY-20, (int)*fX-10, (int)*fY-20);
 	gfx_line((int)*fX-40, (int)*fY+20, (int)*fX-20, (int)*fY+20);
 	gfx_line((int)*fX-30, (int)*fY+7, (int)*fX-10, (int)*fY+7);
 	gfx_line((int)*fX, (int)*fY+20, (int)*fX, (int)*fY+20);
@@ -305,8 +329,10 @@ void createWhale(double *sX, double *sY){
 	XPoint xp = {300,450}; // initialize a point (using X11's Xpoint struct)
 	XPoint mypts1[] = { {*sX+210,*sY},{*sX+230,*sY},{*sX+230,*sY+90} };
 
+
 	gfx_color(65, 100, 146); //blue whale
         gfx_ellipse((int)*sX, (int)*sY, 220, 76); //body
+//	gfx_fill_arc((int)*sX, (int)*sY, 220, 76, 0, 360);
 	gfx_color(17,167,242); //water color to avoid extra oval line over mouth
 	gfx_fill_polygon(mypts1, 3); //cover up line to show true mouth
 	gfx_color(65, 100, 146);
