@@ -14,6 +14,7 @@ void createFish(double *fX, double *fY);
 void createMoreFish(double *mX, double *mY);
 void createLobster(double *lX, double *lY);
 void printGrass();
+void createShark(double *sX, double *sY);
 
 int main()
 {
@@ -41,6 +42,8 @@ int main()
 	double doRotate=1;
 	double ySun=50; //the sun is always setting/rising
 	int velocity=5; //basic velocity of the bird in the air
+	double sX=1;
+	double sY=300;
 
         while(1){
                 gfx_clear();
@@ -51,6 +54,7 @@ int main()
 		createFish(&fX, &fY);
 		createLobster(&lX, &lY);
 		createMoreFish(&mX, &mY);
+		createShark(&sX, &sY);
                 gfx_flush();
 
                 //Check if the user has decided to quit the program
@@ -285,4 +289,16 @@ void createLobster(double *lX, double *lY){
 	gfx_fill_circle((int)*lX-2, (int)*lY-10, 2);
 	//Lips of lobster
 	gfx_line((int)*lX-3, (int)*lY+2, (int)*lX+3, (int)*lY+2);
+}
+
+void createShark(double *sX, double *sY){
+        gfx_ellipse((int)*sX, (int)*sY, 40, 20); //body
+        gfx_line((int)*sX, (int)(*sY-20), (int)*sX, (int)(*sY-20-8)); //top fin
+        gfx_line((int)*sX, (int)(*sY-20-8), (int)(*sX-20*cos(45)), (int)(*sY-20*sin(45)));
+        gfx_circle((int)(*sX+10), (int)(*sY-7), 3); //eye
+        gfx_line((int)(*sX-40), (int)*sY, (int)(*sX-10*cos(M_PI/3)), (int)(*sY-10*sin(M_PI/3)));
+        gfx_line((int)(*sX-10*cos(M_PI/3)), (int)(*sY-10*sin(M_PI/3)), (int)(*sX-10*cos(M_PI/3)), (int)(*sY+10*sin(M_PI/3)));
+	gfx_line((int)(*sX-10*cos(M_PI/3)), (int)(*sY+10*sin(M_PI/3)), (int)(*sX-40), (int)*sY);
+	
+	*sX+=.5;
 }
