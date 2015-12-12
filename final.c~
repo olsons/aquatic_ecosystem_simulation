@@ -6,14 +6,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void createLayout();
-void createSun(double *ySun);
+void createLayout(double *ySun);
 void createDuckHead(double *x1, double *y1, double *beakMovement);
 void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate, double *dX, double *dY, int *numCount);
 void createFish(double *fX, double *fY);
 void createMoreFish(double *mX, double *mY);
 void createLobster(double *lX, double *lY);
 void printGrass();
+void createWhale(double *sX, double *sY);
 
 int main()
 {
@@ -24,33 +24,35 @@ int main()
 	int numCount=0; 
         double i=.01; //used in delta t
 	double l=.01;
-	double beakMovement=0; //used to help measure when the beak is fully closed (so it can be opened again)
+	double beakMovement=22; //used to help measure when the beak is fully closed (so it can be opened again)
         double deltat=.01;  //used in change of time
-        double x1=50; //Where the duck starts (on left hand of page)
-        double y1=120; 
+        double x1=-10; //Where the duck starts (on left hand of page)
+        double y1=156; 
         double bX=400;//the starting point for the bird
 	double bY=50;
-	double fX=10; //starting point for the fish
-	double fY=400;
+	double fX=810; //starting point for the fish that are minnows
+	double fY=390;
 	double lX=0; //starting point for the lobster
 	double lY=600;
 	double dX=500; //dead fish
 	double dY=200;
-	double mX=1;
+	double mX=1; //goldfish 
 	double mY=220;
 	double doRotate=1;
-	double ySun=50; //the sun is always setting/rising
+	double ySun=-5; //the sun is always setting/rising
 	int velocity=5; //basic velocity of the bird in the air
+	double sX=-230; //whale
+	double sY=390;
 
         while(1){
                 gfx_clear();
-		createLayout(); //create the layout of the structure
-		createSun(&ySun); //create a visual of the sun in the corner
+		createLayout(&ySun); //create the layout of the structure
 		createDuckHead(&x1, &y1, &beakMovement);
 		createBird(&bX, &bY, &i, &l, velocity, &doRotate, &dX, &dY, &numCount);
 		createFish(&fX, &fY);
 		createLobster(&lX, &lY);
 		createMoreFish(&mX, &mY);
+		createWhale(&sX, &sY);
                 gfx_flush();
 
                 //Check if the user has decided to quit the program
@@ -69,7 +71,33 @@ int main()
 }
 
 //Create the structure/support for the ride (what will hold up the duck)
-void createLayout(){
+void createLayout(double *ySun){
+	//Create a filled in sun
+	if (*ySun<=110){
+		gfx_color(186, 240, 255);
+		gfx_fill_rectangle(0,0, 800,200); //blue sky
+	}
+	else if(*ySun<=170){
+		gfx_color(255, 188, 154);
+		gfx_fill_rectangle(0,0, 800,200); //pink sky
+	}
+	else if(*ySun<=200){
+		gfx_color(255, 128, 64);
+		gfx_fill_rectangle(0,0, 800,200);  //pink-orange beautiful sunset
+	}
+	else{
+		gfx_color(0,0,0);
+		gfx_fill_rectangle(0,0, 800,200); //black sky w/ moon
+		gfx_color(255, 255, 255);
+		gfx_fill_arc(100, 50, 30, 30,0,360);
+	}
+	gfx_color(255,255,0); //bright yellow
+        gfx_fill_arc(550, *ySun, 80, 80,0,360); //fill in beautiful sun
+	*ySun=*ySun+.04;
+	if (*ySun>=280){
+		*ySun=0;
+	}
+
 	//Water
 	gfx_color(17,167,242); 
 	int i;
@@ -122,39 +150,28 @@ void printGrass(){
 	gfx_line(734, 760, 738, 700);
 }	
 
-//Create a filled in sun
-void createSun(double *ySun){
-	gfx_color(255,255,0); //bright yellow
-        gfx_fill_arc(550, *ySun, 80, 80,0,360); //fill in beautiful sun
-	*ySun=*ySun+.01;
-	if (*ySun>=120)
-	{
-		*ySun=0;
-	}
-}
-
 //Create the duck's head
 void createDuckHead(double *x1, double *y1, double *beakMovement){
 	*x1+=.2;
 	if (*x1>=750){
-		*x1=50;
+		*x1=-50;
 	}
 	//Move the beak
-	*beakMovement=*beakMovement+.5; 
+	*beakMovement=*beakMovement+.3; 
         //Y2 goes back to original position after the line is completely horizontal so beak won't over extend
-        if (*beakMovement==50){
-              	*beakMovement=0;
+        if (*beakMovement>=50){
+              	*beakMovement=22;
        	}
 	gfx_color(255, 160, 36); //Beak's color
-        gfx_line((int)*x1+45, (int)*y1-10, (int)*x1+110, (int)*y1-50+*beakMovement); //top beak of the bird
-        gfx_line((int)*x1+45, (int)*y1+10, (int)*x1+110, (int)*y1+50-*beakMovement); //bottom beak of the bird
+        gfx_line((int)*x1+15, (int)*y1-8, (int)*x1+46, (int)*y1-50+*beakMovement); //top beak of the bird
+        gfx_line((int)*x1+15, (int)*y1+8, (int)*x1+46, (int)*y1+50-*beakMovement); //bottom beak of the bird
 	gfx_color(12, 115, 0); //Duck's head's color
-        gfx_fill_circle((int)*x1, (int)*y1, 45); //Duck's head
+        gfx_fill_circle((int)*x1, (int)*y1, 20); //Duck's head
 	gfx_color(169, 116, 8);
-	gfx_fill_circle((int)*x1-45, (int)*y1+40, 55); //Duck's body
+	gfx_fill_circle((int)*x1-30, (int)*y1+30, 35); //Duck's body
 	gfx_color(17,2,2);
-	gfx_fill_circle((int)*x1+20, (int)*y1-10, 5);
-}
+	gfx_fill_circle((int)*x1+10, (int)*y1-5, 3); //duck's eyeball
+} 
 
 //Create person moving in the cart
 void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate, double *dX, double *dY, int *numCount){
@@ -176,6 +193,7 @@ void createBird(double *bX, double *bY, double *i, double *l, double velocity, d
 			*doRotate=1;
 			*bX=40;
 			*dX=900;
+			*numCount=1;
 		}
 		if(*bX>=500 && *bX<=780){
 			*bY=*bY-.8;
@@ -201,17 +219,13 @@ void createBird(double *bX, double *bY, double *i, double *l, double velocity, d
  	XPoint mypts1[] = { {*dX,*dY-10},{*dX,*dY+10},{*dX+10,*dY} };
 	gfx_fill_polygon(mypts1, 3);
 	gfx_fill_circle((int)*dX+10, (int)*dY, 8);
-	*numCount=1;
 }
 
 void createFish(double *fX, double *fY){
 	gfx_color(100, 100, 100);
-	*fX=*fX+5;
-	if (*fY==780){
-		*fY=*fY+1;
-	}
-	if (*fX==780){
-		*fX=20;
+	*fX=*fX-5;
+	if (*fX<=10){
+		*fX=820;
 	}
 	gfx_line((int)*fX, (int)*fY, (int)*fX+20, (int)*fY);
 	gfx_line((int)*fX+10, (int)*fY, (int)*fX+30, (int)*fY);
@@ -285,4 +299,27 @@ void createLobster(double *lX, double *lY){
 	gfx_fill_circle((int)*lX-2, (int)*lY-10, 2);
 	//Lips of lobster
 	gfx_line((int)*lX-3, (int)*lY+2, (int)*lX+3, (int)*lY+2);
+}
+
+void createWhale(double *sX, double *sY){
+	XPoint xp = {300,450}; // initialize a point (using X11's Xpoint struct)
+	XPoint mypts1[] = { {*sX+210,*sY},{*sX+230,*sY},{*sX+230,*sY+90} };
+
+	gfx_color(65, 100, 146); //blue whale
+        gfx_ellipse((int)*sX, (int)*sY, 220, 76); //body
+	gfx_color(17,167,242); //water color to avoid extra oval line over mouth
+	gfx_fill_polygon(mypts1, 3); //cover up line to show true mouth
+	gfx_color(65, 100, 146);
+	gfx_line((int)(*sX+100),(int)(*sY),(int)(*sX+220), (int)(*sY)+2); //mouth
+	gfx_line((int)(*sX+100),(int)(*sY),(int)(*sX+215), (int)(*sY)+20); //mouth
+        gfx_circle((int)(*sX+135), (int)(*sY-30), 4); //eye
+        gfx_line((int)(*sX-220), (int)*sY, (int)(*sX-220-50*cos(M_PI/3)), (int)(*sY+50*sin(M_PI/3))); //next three tail
+        gfx_line((int)(*sX-220-50*cos(M_PI/3)), (int)(*sY+50*sin(M_PI/3)), (int)(*sX-220-50*cos(M_PI/3)), (int)(*sY-50*sin(M_PI/3)));
+	gfx_line((int)(*sX-220-50*cos(M_PI/3)), (int)(*sY-50*sin(M_PI/3)), (int)(*sX-220), (int)*sY);
+	if ((*sX-230)<=798){
+		*sX+=.5; //whale speed
+	}
+	else{
+		*sX=-400;
+	}
 }
