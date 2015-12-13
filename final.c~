@@ -8,7 +8,7 @@
 #include <time.h>
 
 void createLayout(double *ySun, double **gAngle, int **gDir, double **wX, int **wDir);
-void createDuckHead(double *x1, double *y1, double *beakMovement);
+void createDuck(double *x1, double *y1, double *beakMovement);
 void createBird(double *bX, double *bY, double *i, double *l, double velocity, double *doRotate, double *dX, double *dY, int *numCount);
 void createFish(double *fX, double *fY, double *fY2, double *sX, int *eat);
 void createMoreFish(double *mX, double *mY);
@@ -16,10 +16,11 @@ void createLobster(double *lX, double *lY);
 void printGrass(double *gAngle, int *gDir);
 void printWaves(double *wX, int *wDir);
 void createWhale(double *sX, double *sY);
+void createSquid(double *qX, double *qY, int *direction, double *iX, double *iY, double *r);
 
 int main()
 {
-	gfx_open(800, 800, "Carnival Ride: The Duck");
+	gfx_open(800, 800, "A soFISHticated Aquatic Ecosystem");
 
         //Declare variables of the ride
         char c; //check to see if someone presses a button
@@ -33,7 +34,7 @@ int main()
         double bX=400;//the starting point for the bird
 	double bY=50;
 	double fX=810; //starting point for the fish that are minnows
-	double fY=390;
+	double fY=390; 
 	double fY2=390;
 	srand(time(NULL));	
 	int eat=rand() % 2; //determines if one of the minnows will be eaten by the whale or not
@@ -56,16 +57,23 @@ int main()
 	int *wdir=&wDir;
 	double sX=-230; //whale
 	double sY=390;
+	double qX=600; //squid
+	double qY=600;
+	double iX=650; //ink
+	double iY=610;
+	double r=5; //radius of ink
+	int direction=1; //direction of the squid
 
         while(1){
                 gfx_clear();
 		createLayout(&ySun, &gangle, &gdir, &wx, &wdir); //create the layout of the structure
-		createDuckHead(&x1, &y1, &beakMovement);
+		createDuck(&x1, &y1, &beakMovement);
 		createBird(&bX, &bY, &i, &l, velocity, &doRotate, &dX, &dY, &numCount);
 		createFish(&fX, &fY, &fY2, &sX, &eat);
 		createLobster(&lX, &lY);
 		createMoreFish(&mX, &mY);
 		createWhale(&sX, &sY);
+		createSquid(&qX, &qY, &direction, &iX, &iY, &r);
                 gfx_flush();
 
                 //Check if the user has decided to quit the program
@@ -104,6 +112,14 @@ void createLayout(double *ySun, double **gAngle, int **gDir, double **wX, int **
 		gfx_color(255, 255, 255);
 		gfx_fill_arc(100, 50, 30, 30,0,360);
 	}
+	if (*ySun<=200){
+		//Clouds
+		gfx_color(255, 255, 255);
+		gfx_fill_arc(29, 29, 95, 40, 0, 360);
+		gfx_fill_arc(70, 45, 85, 40, 0, 360);
+		gfx_fill_arc(779, 29, 95, 40, 0, 360);
+		gfx_fill_arc(720, 45, 85, 40, 0, 360);
+	}
 	gfx_color(255,255,0); //bright yellow
         gfx_fill_arc(550, *ySun, 80, 80,0,360); //fill in beautiful sun
 	*ySun=*ySun+.04;
@@ -116,7 +132,7 @@ void createLayout(double *ySun, double **gAngle, int **gDir, double **wX, int **
 	int i;
 	gfx_fill_rectangle(0,200, 800,600);
 
-	//Set up sand bank
+	//Set up sand bank 
   	XPoint xp = {300,450}; // initialize a point (using X11's Xpoint struct)
 
 	// set up 2 arrays of points
@@ -127,6 +143,12 @@ void createLayout(double *ySun, double **gAngle, int **gDir, double **wX, int **
 	gfx_fill_polygon(mypts1, 3);
 	gfx_fill_polygon(mypts2, 3);
 	gfx_fill_rectangle(0, 700, 800, 100); 
+
+	//set up twigs
+	gfx_color(122, 69, 0); //brown twig color
+	gfx_fill_rectangle(10, 710, 22, 6); 
+	gfx_fill_rectangle(780, 700, 20, 3); 
+	gfx_fill_rectangle(30, 750, 30, 5);
 
 	printGrass(*gAngle, *gDir);
 	printWaves(*wX, *wDir);
@@ -158,24 +180,24 @@ void printWaves(double *wX, int *wDir){
 	//draw the waves
 	int i;
 	gfx_color(17,167,242);
-	for (i=0;i<=40;i++){
+	for (i=-1;i<=20;i++){
 		gfx_fill_arc(40*(*wX+i), 190, 40, 20, 0, 180);
 	}
 	if (*wX>=.5 || (*wDir==1 && *wX>=-.5)){
-		*wX-=.001;
+		*wX-=.005;
 		*wDir=1; //moving left
 	}
 	else if (*wX<=-.5 || (*wDir==0 && *wX<=.5)){
-		*wX+=.001;
-		*wDir==0; //moving right
+		*wX+=.005;
+		*wDir=0; //moving right
 	}
 }
 
-//Create the duck's head
-void createDuckHead(double *x1, double *y1, double *beakMovement){
+//Create the duck
+void createDuck(double *x1, double *y1, double *beakMovement){
 	*x1+=.2;
-	if (*x1>=750){
-		*x1=-50;
+	if (*x1>=875){
+		*x1=-75;
 	}
 	//Move the beak
 	*beakMovement=*beakMovement+.3; 
@@ -210,13 +232,13 @@ void createBird(double *bX, double *bY, double *i, double *l, double velocity, d
 		if (*bX>300 && *bX<=750 && *bY <= 200){
 			*bY=*bY+.7;
 		}
-		if (*bX>=780){
+		if (*bX>=790){
 			*doRotate=1;
 			*bX=40;
 			*dX=900;
 			*numCount=1;
 		}
-		if(*bX>=500 && *bX<=780){
+		if(*bX>=500 && *bX<=790){
 			*bY=*bY-.8;
 		}
 	}
@@ -224,7 +246,7 @@ void createBird(double *bX, double *bY, double *i, double *l, double velocity, d
 	gfx_line((int)*bX, (int)*bY, (int)*bX-20, (int)*bY-20); //Bird's wings
         gfx_line((int)*bX, (int)*bY, (int)*bX-20, (int)*bY+20); //Bird's wings
 
-	if (*bX >= 500 && *bX <=780){
+	if (*bX >= 500 && *bX <=790){
 		*dX=*bX;
 		*dY=*bY;
 	}
@@ -240,6 +262,8 @@ void createBird(double *bX, double *bY, double *i, double *l, double velocity, d
  	XPoint mypts1[] = { {*dX,*dY-10},{*dX,*dY+10},{*dX+10,*dY} };
 	gfx_fill_polygon(mypts1, 3);
 	gfx_fill_circle((int)*dX+10, (int)*dY, 8);
+	gfx_color(0, 0, 0); //dead fish eye color
+	gfx_text(*dX+10, *dY+3, "X");
 }
 
 void createFish(double *fX, double *fY, double *fY2, double *sX, int *eat){
@@ -253,16 +277,6 @@ void createFish(double *fX, double *fY, double *fY2, double *sX, int *eat){
 			*fY2+=3;
 		}
 	}
-	/*if (*sX>=450 && *fX>=600){ //minnows swim down while the whale is moving off screen
-		*fY=570;
-		*fY2=570;
-		if (*eat==1){		
-			*fY2+=1;
-		}
-		else if (*eat==0){
-			*fY2+=3;
-		}
-	}*/
 	*fX-=5;
 	if (*fX<=10){
 		*fY=390;
@@ -284,18 +298,23 @@ void createFish(double *fX, double *fY, double *fY2, double *sX, int *eat){
 
 void createMoreFish(double *mX, double *mY){
 	gfx_color(252, 206, 25);
-	//Dead bird that it will pick up eventually
 	XPoint xp = {300,450}; // initialize a point (using X11's Xpoint struct)
-	// set up 2 arrays of points
+	// set up 2 arrays of points, gold fish
  	XPoint mypts1[] = { {*mX,*mY-10},{*mX,*mY+10},{*mX+10,*mY} };
 	XPoint mypts2[] = { {*mX+2,*mY+40},{*mX+2,*mY+20},{*mX+12,*mY+30} };
 	XPoint mypts3[] = { {*mX-8,*mY+60},{*mX-8,*mY+80},{*mX,*mY+70} };
+	XPoint mypts4[] = { {*mX-26,*mY+55},{*mX-26,*mY+65},{*mX-18,*mY+60} }; //baby one
 	gfx_fill_polygon(mypts1, 3);
 	gfx_fill_circle((int)*mX+10, (int)*mY, 8);
 	gfx_fill_polygon(mypts2, 3);
 	gfx_fill_circle((int)*mX+12, (int)*mY+30, 8);
 	gfx_fill_polygon(mypts3, 3);
 	gfx_fill_circle((int)*mX, (int)*mY+70, 8);
+	if (*mX>=200){
+		gfx_color(255, 240, 137);
+		gfx_fill_polygon(mypts4, 3);
+		gfx_fill_circle((int)*mX-18, (int)*mY+60, 6);
+	}
 	if (*mX<=790){
 		*mX=*mX+.5;
 	}
@@ -356,10 +375,56 @@ void createWhale(double *sX, double *sY){
 	gfx_color(17,167,242); //water color to avoid extra oval line over mouth
 	gfx_fill_polygon(mypts1, 3); //cover up line to show true mouth
 	gfx_fill_arc((int)(*sX+131), (int)(*sY-34), 8, 8, 0, 360); //eye
-	if ((*sX-230)<=798){
+	if ((*sX-230)<=850){
 		*sX+=.5; //whale speed
 	}
 	else{
 		*sX=-400;
+	}
+}
+
+void createSquid(double *qX, double *qY, int *direction, double *iX, double *iY, double *r){
+	gfx_color(253, 6, 6);
+	gfx_fill_arc((int)(*qX), (int)(*qY), 50, 90, 0, 360); //squid filled in red like fire
+	gfx_line((int)*qX+22, (int)*qY+80, (int)*qX, (int)*qY+140); //squid's legs
+	gfx_line((int)*qX+25, (int)*qY+80, (int)*qX+10, (int)*qY+140);
+	gfx_line((int)*qX+27, (int)*qY+80, (int)*qX+20, (int)*qY+140);
+	gfx_line((int)*qX+28, (int)*qY+80, (int)*qX+25, (int)*qY+140);
+	gfx_line((int)*qX+29, (int)*qY+80, (int)*qX+30, (int)*qY+140);
+	gfx_line((int)*qX+29, (int)*qY+80, (int)*qX+36, (int)*qY+140);
+	gfx_line((int)*qX+30, (int)*qY+80, (int)*qX+45, (int)*qY+140);
+	gfx_color(255, 255, 255);
+	gfx_fill_arc((int)(*qX+30), (int)(*qY+45), 10, 20, 0, 360); //squid eyes
+	gfx_fill_arc((int)(*qX+10), (int)(*qY+45), 10, 20, 0, 360); //squid eyes
+	gfx_color(0, 0, 0);
+	gfx_fill_arc((int)(*qX+30), (int)(*qY+56), 5, 5, 0, 360); //squid pupil
+	gfx_fill_arc((int)(*qX+10), (int)(*qY+56), 5, 5, 0, 360); //squid pupil
+	if ((*direction==-1)&&(*iY<=950)){
+		gfx_fill_arc((int)(*iX), (int)(*iY), *r, *r, 0, 360); //squid inks
+		*iY=*iY+.05;
+		*iX=*iX+.07;
+		*r=*r+.02;
+	}
+	else{
+		*iY=610;
+		*iX=650;
+		*r=5;
+	}
+	switch(*direction){
+		case 1:
+			*qY=*qY-.05 ;//moving up
+			break;
+		case -1:
+			*qY=*qY+.05; //moving down
+			break;
+	}
+	//Squid
+	if(*qY<=500){
+		*direction=-1;
+		*qY=501; //put it back into old range
+	}
+	else if(*qY>=600){
+		*direction=1;
+		*qY=599;
 	}
 }
